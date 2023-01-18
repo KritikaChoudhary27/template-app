@@ -1,8 +1,22 @@
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget{
+
+  const HomePage({Key? key}):super(key: key);
+
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+
+}
+
+class _HomePageState extends State<HomePage>{
+
   @override
   Widget build(BuildContext context) {
     String title = "custom widget";
@@ -14,9 +28,13 @@ class HomePage extends StatelessWidget {
         ),
         body: Container(
           child: Column(
-            children: [ CatItems(), contact(), subcat(), bottom()],
+            children: [ const CatItems(), const contact(), subcat(), bottom()],
           ),
-        )
+        ),
+          floatingActionButton: const FloatingActionButton(
+          onPressed: fetch_user,
+    child: Icon(Icons.add),)
+
     );
   }
 }
@@ -31,9 +49,9 @@ class CatItems extends StatelessWidget{
         flex: 1,
         child: Container(
           height: 200,
-          color: Colors.red[50],
-          child: ListView.builder(itemBuilder: (context, index) =>Padding(
-            padding: const EdgeInsets.all(8.0),
+          //color: Colors.red[50],
+          child: ListView.builder(itemBuilder: (context, index) =>const Padding(
+            padding: EdgeInsets.all(8.0),
             child: SizedBox(
               //width: 100,
               child: CircleAvatar(
@@ -57,9 +75,29 @@ class contact extends StatelessWidget{
     return Expanded(
         flex: 4,
         child: Container(
-          height: 200,
-          color: Colors.red[100],
-          child: ListView.builder(itemBuilder: (context, index) => Padding(
+         // height: 200,
+          //color: Colors.red[100],
+          child:ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index){
+                final user = users[index];
+                final email = user['email'];
+                final name = user['name']['first'];
+                final imagUrl = user['picture']['thumbnail'];
+                return ListTile(
+                  leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Image.network(imagUrl)),
+                  title: Text(name),
+                  subtitle: Text(email),
+
+                );
+              }),
+
+
+
+
+          /* ListView.builder(itemBuilder: (context, index) => Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
               leading:CircleAvatar(
@@ -72,7 +110,7 @@ class contact extends StatelessWidget{
           ),
             itemCount: 10,
 
-          ),
+          ),*/
         )
     );
   }
@@ -85,7 +123,7 @@ class subcat extends StatelessWidget{
         flex: 2,
         child: Container(
           height: 200,
-          color: Colors.red[200],
+          //color: Colors.red[200],
           child: ListView.builder(itemBuilder: (context, index) =>
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -113,7 +151,7 @@ class bottom extends StatelessWidget{
         flex: 1,
         child: Container(
           height: 50,
-          color: Colors.red[300],
+          //color: Colors.red[300],
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: GridView.count(
@@ -144,4 +182,16 @@ class bottom extends StatelessWidget{
         )
     );
   }
+}
+
+List<dynamic> users = [];
+Future<void> fetch_user() async {
+  print("fetch users");
+  const url = "https://randomuser.me/api/?results=10";
+  final uri = Uri.parse(url);
+  final response = await http.get(uri);
+  final body = response.body;
+  final json = jsonDecode(body);
+  users = json['results'];
+  print("fetched");
 }
