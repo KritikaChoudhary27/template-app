@@ -81,6 +81,7 @@ class contact extends StatelessWidget{
               itemCount: users.length,
               itemBuilder: (context, index){
                 final user = users[index];
+                //print(user);
                 final email = user['email'];
                 final name = user['name']['first'];
                 final imagUrl = user['picture']['thumbnail'];
@@ -193,5 +194,6 @@ Future<void> fetch_user() async {
   final body = response.body;
   final json = jsonDecode(body);
   users = json['results'];
+  print(users);
   print("fetched");
 }
